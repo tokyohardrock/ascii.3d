@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"math"
 	"time"
 )
@@ -25,9 +26,9 @@ type scrnCoords struct {
 }
 
 var vrtcs vertices = vertices{
-	[]float64{-1, 1, 1, -1, -1, 1, 1, -1},
-	[]float64{-1, -1, 1, 1, -1, -1, 1, 1},
-	[]float64{-1, -1, -1, -1, 1, 1, 1, 1},
+	[]float64{-2, 1, 2, -2, -2.5, 2, 2, -2},
+	[]float64{-2, -1, 2, 2, -2.5, -2, 2, 2},
+	[]float64{-2, -1, -2, -2, 2.5, 2, 2, 2},
 }
 
 var edges []int = []int{
@@ -50,6 +51,24 @@ var edges []int = []int{
 var xyzRotations = []float64{0, 0, 0}
 
 var ascii []byte = []byte{' ', '#'}
+
+func normalizeVertices(vrt *vertices) {
+	var maxElem float64
+	for i := range vrt.x {
+		val := math.Max(math.Abs(vrt.x[i]), math.Max(math.Abs(vrt.y[i]), math.Abs(vrt.z[i])))
+		maxElem = math.Max(maxElem, val)
+	}
+	if maxElem == 0 {
+		log.Fatal("Singularity detected — normalization aborted")
+		return
+	}
+	scale := 1 / maxElem
+	for i := range vrt.x {
+		vrt.x[i] *= scale
+		vrt.y[i] *= scale
+		vrt.z[i] *= scale
+	}
+}
 
 func getTransformedCoords(x, y, z float64) (float64, float64, float64) {
 	var coordsMatrix = [][]float64{
@@ -145,17 +164,13 @@ func draw() {
 }
 
 func main() {
+	normalizeVertices(&vrtcs)
 	for {
 		time.Sleep(time.Second / fps)
 		ClearScreen()
-		if xyzRotations[0] >= math.Pi*2 {
-			xyzRotations[0] = 0
+		for i := range xyzRotations {
+			xyzRotations[i] = math.Mod(xyzRotations[i], math.Pi*2) + delta
 		}
-		if xyzRotations[2] >= math.Pi*2 {
-			xyzRotations[2] = 0
-		}
-		xyzRotations[0] += delta
-		xyzRotations[2] += delta
 		draw()
 	}
 }

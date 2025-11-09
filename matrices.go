@@ -14,7 +14,7 @@ func yRotationMatrix(angle float64) [][]float64 {
 	return [][]float64{
 		{math.Cos(angle), 0, math.Sin(angle)},
 		{0, 1, 0},
-		{math.Sin(angle), 0, math.Cos(angle)},
+		{-math.Sin(angle), 0, math.Cos(angle)},
 	}
 }
 
